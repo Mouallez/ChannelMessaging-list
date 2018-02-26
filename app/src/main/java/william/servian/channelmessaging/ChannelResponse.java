@@ -3,9 +3,9 @@ package william.servian.channelmessaging;
 import java.util.ArrayList;
 
 /**
- * Created by sacquind on 05/02/2018.
+ * Created by sacquind on 26/02/2018.
  */
-public class ChannelReponse {
+public class ChannelResponse {
     public ArrayList<Channel> channels;
 
     public ArrayList<Channel> getChannels() {

@@ -23,47 +23,51 @@ import java.util.HashMap;
  * Created by sacquind on 29/01/2018.
  */
 public class ChannelListActivity extends AppCompatActivity implements View.OnClickListener,OnDownloadListener{
+    private ListView listView ;
     SharedPreferences sharedPreferences;
-    private ListView liste;
-
-
-
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_channellist);
+        listView = (ListView) findViewById(R.id.listView);
+
         sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         HttpPostHandler http = new HttpPostHandler();
         http.addOnDownloadListener(this);
-        HashMap<String, String> paramsPost = new HashMap<>();
-        String myToken = sharedPreferences.getString("accessToken",null);
-        paramsPost.put("accesstoken",myToken);
-        http.execute(new PostRequest("http://www.raphaelbischof.fr/messaging/?function=getchannels",paramsPost));
-        liste = (ListView) findViewById(R.id.listView);
+        HashMap<String,String> hashMap=new HashMap<>();
+        hashMap.put("accesstoken",sharedPreferences.getString("accessToken",null));
+        http.execute(new PostRequest("http://www.raphaelbischof.fr/messaging/?function=getchannels",hashMap));
     }
 
     @Override
-    public void onClick(View v)
-    {
+    public void onClick(View v) {
 
     }
 
     @Override
-    public void onDownloadComplete(String downloadedContent) {
+    public void onDownloadComplete(String downloadContent) {
 
         Gson gson = new Gson();
-        ChannelReponse obj = gson.fromJson(downloadedContent, ChannelReponse.class);
+        ChannelResponse obj = gson.fromJson(downloadContent, ChannelResponse.class);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
 
-        for (Channel chan:obj.getChannels()) {
+        for (Channel chan:obj.getChannels()){
             arrayAdapter.add(chan.getName().toString());
-
         }
+        listView.setAdapter(arrayAdapter);
 
-        liste.setAdapter(arrayAdapter);
         arrayAdapter.notifyDataSetChanged();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(ChannelListActivity.this, Channel.class);
+                intent.putExtra("channelId",String.valueOf(id+1));
+                startActivity(intent);
+            }
+        });
+
     }
+
 
     @Override
     public void onDownloadError(String error) {
